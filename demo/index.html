@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghost Mask Demo</title>
+
+    <!-- стили -->
+    <link rel="stylesheet" href="/styles/ghost-mask.css">
+    <link rel="stylesheet" href="/demo/styles.css">
+</head>
+<body>
+
+<div class="card">
+    <h2>📞 Демо поля ввода телефона</h2>
+    <div class="field-group">
+        <label>Номер телефона</label>
+
+        <div class="phone-wrapper">
+            <div class="country-code">🇷🇺 +7</div>
+
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="912 345-67-89"
+                    type="text"
+                    id="phone1"
+                    placeholder=" "
+                    autocomplete="off"
+                    inputmode="numeric"
+                >
+
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field-group">
+        <label>Запасной номер телефона</label>
+        <div class="phone-wrapper">
+            <div class="country-code">🇷🇺 +7</div>
+
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="+7 (912) 345-67-89"
+                    data-initial="+7 (987) 654-32-10"
+                    type="text"
+                    id="phone2"
+                    placeholder=" "
+                    autocomplete="off"
+                    inputmode="numeric"
+                >
+
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import '../src/auto-init.js';
+</script>
+
+</body>
+</html>
