@@ -1,127 +1,170 @@
-import {
-    getCharCountBeforeCursor,
-    getCharCountInSelection,
-    getCharPositionInFormatted
-} from '../core/cursor.js';
-
-import { formatByMask } from '../core/format.js';
-
+import { MaskFormatter } from '../core/maskFormatter.js';
 import { DigitFilter } from '../filters/DigitFilter.js';
 
+/**
+ * Контроллер masked input.
+ *
+ * Source of truth:
+ * - rawValue: реальные пользовательские данные
+ * - formattedValue: отображаемое значение input по маске
+ *
+ * DOM input.value никогда не используется как источник истины.
+ */
 export class InputController {
+    /**
+     * @param {HTMLInputElement} inputElement
+     * @param {Object} options
+     * @param {string} options.mask
+     * @param {Object} [options.filter]
+     * @param {Function} [options.transformer]
+     * @param {Object} [options.renderer]
+     * @param {string[]} [options.separators]
+     * @param {boolean} [options.autoCloseBracket]
+     */
     constructor(inputElement, options = {}) {
         this.inputElement = inputElement;
+
         this.mask = options.mask;
-        this.renderer = options.renderer;
-        this.country = options.country || null;
+        this.renderer = options.renderer ?? null;
+        this.transformer = options.transformer ?? null;
 
-        // 👉 фильтр (по умолчанию цифры)
-        this.filter = options.filter || new DigitFilter();
+        this.filter = options.filter ?? new DigitFilter();
 
-        this.lastValue = "";
-        this.lastFormatted = "";
+        this.formatter = new MaskFormatter(
+            this.mask,
+            this.filter,
+            {
+                separators: options.separators,
+                autoCloseBracket: options.autoCloseBracket
+            }
+        );
+
+        /**
+         * Реальные пользовательские данные без масочных separator.
+         * Может содержать символы, совпадающие с separator.
+         * @type {string}
+         */
+        this.rawValue = '';
+
+        /**
+         * Отформатированное значение input.
+         * @type {string}
+         */
+        this.formattedValue = '';
+
+        /**
+         * Последний mapping formatter-а.
+         * @type {Object|null}
+         */
+        this.mapping = null;
 
         this._bindEvents();
-        this._init();
-        this._updateUI('');
-        console.log('FILTER:', this.filter);
-        console.log('allowChar:', this.filter?.allowChar);
+        this._render();
     }
 
+    /**
+     * Подписка на DOM-события.
+     * @private
+     */
     _bindEvents() {
-        this.inputElement.addEventListener('input', this._onInput.bind(this));
         this.inputElement.addEventListener('keydown', this._onKeyDown.bind(this));
         this.inputElement.addEventListener('paste', this._onPaste.bind(this));
-
-        this._syncRenderer();
+        this.inputElement.addEventListener(
+            'input',
+            this._onNativeInput.bind(this)
+        );
     }
 
-    _init() {
-        this.inputElement.value = '';
-        this.lastValue = '';
-        this.lastFormatted = '';
+    /**
+     * Главный рендер пайплайн.
+     *
+     * 1. Применяет transformer
+     * 2. Форматирует rawValue по mask
+     * 3. Обновляет DOM
+     * 4. Синхронизирует renderer
+     *
+     * @private
+     */
+    _render() {
+        let raw = this.rawValue;
+
+        if (this.transformer) {
+            raw = this.transformer(raw);
+        }
+
+        const mapping = this.formatter.format(raw);
+
+        this.rawValue = raw;
+        this.formattedValue = mapping.formatted;
+        this.mapping = mapping;
+
+        this.inputElement.value = this.formattedValue;
+
+        if (this.renderer) {
+            this.renderer.syncStyles(this.inputElement);
+            this.renderer.update(this.formattedValue);
+        }
     }
 
+    /**
+     * Обработка keydown.
+     *
+     * Полностью перехватывает ввод.
+     * Нативный input event не используется.
+     *
+     * @param {KeyboardEvent} event
+     * @private
+     */
     _onKeyDown(event) {
-        const val = this.inputElement.value;
-        const pos = this.inputElement.selectionStart;
-
-        // --- Backspace ---
-        if (event.key === 'Backspace') {
-            if (pos > 0 && !this.filter.isValidChar(val[pos - 1])) {
-                event.preventDefault();
-
-                const value = this.filter.filter(val);
-                const charPos = getCharCountBeforeCursor(val, pos, this.filter);
-
-                if (charPos > 0) {
-                    const newValue =
-                        value.slice(0, charPos - 1) +
-                        value.slice(charPos);
-
-                    this._applyValue(newValue, charPos - 1);
-                }
-                return;
-            }
-        }
-
-        // --- Delete ---
-        if (event.key === 'Delete') {
-            if (pos < val.length && !this.filter.isValidChar(val[pos])) {
-                event.preventDefault();
-
-                const value = this.filter.filter(val);
-                const charPos = getCharCountBeforeCursor(val, pos, this.filter);
-
-                if (charPos < value.length) {
-                    const newValue =
-                        value.slice(0, charPos) +
-                        value.slice(charPos + 1);
-
-                    this._applyValue(newValue, charPos);
-                }
-                return;
-            }
-        }
-
-        // --- Shift+Insert ---
-        if (event.shiftKey && event.key === 'Insert') {
-            event.preventDefault();
-
-            navigator.clipboard.readText().then(text => {
-                this._onPaste({
-                    clipboardData: { getData: () => text },
-                    preventDefault: () => {}
-                });
-            });
-
+        console.log({
+            key: event.key,
+            composing: event.isComposing,
+            rawValue: this.rawValue,
+            formattedValue: this.formattedValue,
+            domValue: this.inputElement.value
+        });
+        if (event.isComposing || event.key === 'Process') {
             return;
         }
 
         const controlKeys = [
-            'Backspace','Delete','Tab','Escape','Enter',
-            'ArrowLeft','ArrowRight','ArrowUp','ArrowDown',
-            'Home','End'
+            'Tab', 'Escape', 'Enter',
+            'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+            'Home', 'End',
+            'Shift', 'CapsLock', 'Meta', 'Control', 'Alt'
         ];
 
         if (controlKeys.includes(event.key)) return;
         if (event.ctrlKey || event.metaKey) return;
 
-        // 👉 фильтр решает, можно ли вводить символ
-        if (!this.filter.allowChar(event.key)) {
-            event.preventDefault();
-        }
-    }
-
-    _onPaste(event) {
         event.preventDefault();
 
-        const start = this.inputElement.selectionStart;
-        const end = this.inputElement.selectionEnd;
-        const hasSelection = start !== end;
 
-        const currentFormatted = this.inputElement.value;
-        const currentValue = this.filter.filter(currentFormatted);
+        if (event.key === 'Backspace') {
+            this._handleBackspace();
+            return;
+        }
+
+        if (event.key === 'Delete') {
+            this._handleDelete();
+            return;
+        }
+
+        if (!this.filter.allowChar(event.key)) {
+            return;
+        }
+
+        this._handleInsert(event.key);
+    }
+
+    /**
+     * Обработка paste.
+     *
+     * @param {ClipboardEvent} event
+     * @private
+     */
+    _onPaste(event) {
+        event.preventDefault();
 
         const pasted = this.filter.filter(
             event.clipboardData.getData('text')
@@ -129,167 +172,234 @@ export class InputController {
 
         if (!pasted.length) return;
 
-        let newValue;
-        let targetIndex;
-
-        if (hasSelection) {
-            const before = getCharCountBeforeCursor(currentFormatted, start, this.filter);
-            const inSelection = getCharCountInSelection(currentFormatted, start, end, this.filter);
-
-            newValue =
-                currentValue.slice(0, before) +
-                pasted +
-                currentValue.slice(before + inSelection);
-
-            targetIndex = before + pasted.length;
-
-        } else {
-            const before = getCharCountBeforeCursor(currentFormatted, start, this.filter);
-
-            newValue =
-                currentValue.slice(0, before) +
-                pasted +
-                currentValue.slice(before);
-
-            targetIndex = before + pasted.length;
-        }
-
-        const max = this._getMaxMaskLength();
-        newValue = newValue.slice(0, max);
-
-        this._applyValue(newValue, targetIndex);
-    }
-
-    _onInput() {
         const start = this.inputElement.selectionStart;
         const end = this.inputElement.selectionEnd;
-        const hasSelection = start !== end;
 
-        const currentFormatted = this.inputElement.value;
-        const currentValue = this.filter.filter(currentFormatted);
+        const rawStart = this.formatter.formattedPosToRawIndex(start, this.mapping);
+        const rawEnd = this.formatter.formattedPosToRawIndex(end, this.mapping);
 
-        // 👉 если пользователь ввёл разделитель → откат
-        if (currentValue === this.lastValue) {
-            this._restore(start);
+        this.rawValue =
+            this.rawValue.slice(0, rawStart) +
+            pasted +
+            this.rawValue.slice(rawEnd);
+
+        this._truncateToMask();
+        this._render();
+
+        const cursorPos = this.formatter.rawIndexToFormattedPos(
+            rawStart + pasted.length,
+            this.mapping
+        );
+
+        this._setCursor(cursorPos);
+    }
+
+    /**
+     * Вставка одного символа.
+     *
+     * @param {string} char
+     * @private
+     */
+    _handleInsert(char) {
+        const start = this.inputElement.selectionStart;
+        const end = this.inputElement.selectionEnd;
+
+        const rawStart = this.formatter.formattedPosToRawIndex(start, this.mapping);
+        const rawEnd = this.formatter.formattedPosToRawIndex(end, this.mapping);
+
+        this.rawValue =
+            this.rawValue.slice(0, rawStart) +
+            char +
+            this.rawValue.slice(rawEnd);
+
+        this._truncateToMask();
+        this._render();
+
+        // После _render() this.mapping уже новый,
+        // поэтому используем актуальный маппинг
+        const cursorPos = this.formatter.rawIndexToFormattedPos(
+            rawStart + 1,
+            this.mapping
+        );
+
+        this._setCursor(cursorPos);
+    }
+
+    /**
+     * Backspace по rawValue.
+     * @private
+     */
+    _handleBackspace() {
+        const start = this.inputElement.selectionStart;
+        const end = this.inputElement.selectionEnd;
+
+        const rawStart = this.formatter.formattedPosToRawIndex(start, this.mapping);
+        const rawEnd = this.formatter.formattedPosToRawIndex(end, this.mapping);
+
+        if (start !== end) {
+            this.rawValue =
+                this.rawValue.slice(0, rawStart) +
+                this.rawValue.slice(rawEnd);
+
+            this._render();
+            this._setCursor(
+                this.formatter.rawIndexToFormattedPos(rawStart, this.mapping)
+            );
             return;
         }
 
-        const oldValue = this.lastValue;
+        if (rawStart === 0) return;
 
-        let newValue;
-        let targetIndex;
+        this.rawValue =
+            this.rawValue.slice(0, rawStart - 1) +
+            this.rawValue.slice(rawStart);
 
-        const before = getCharCountBeforeCursor(this.lastFormatted, start, this.filter);
+        this._render();
 
-        if (hasSelection) {
-            const inSelection = getCharCountInSelection(this.lastFormatted, start, end, this.filter);
-
-            if (currentValue.length > oldValue.length - inSelection) {
-                const insertedCount = currentValue.length - (oldValue.length - inSelection);
-
-                newValue =
-                    oldValue.slice(0, before) +
-                    currentValue.slice(before, before + insertedCount) +
-                    oldValue.slice(before + inSelection);
-
-            } else {
-                newValue = currentValue;
-            }
-
-            targetIndex = getCharCountBeforeCursor(currentFormatted, start, this.filter);
-
-        } else {
-            newValue = currentValue;
-            targetIndex = getCharCountBeforeCursor(currentFormatted, start, this.filter);
-        }
-
-        const max = this._getMaxMaskLength();
-        newValue = newValue.slice(0, max);
-
-        this._applyValue(newValue, targetIndex);
-    }
-
-    _applyValue(value, targetIndex) {
-        const formatted = formatByMask(value, this.mask, this.filter);
-
-        if (this.transformer) {
-            value = this.transformer(value ?? '');
-        }
-
-        this.inputElement.value = formatted;
-        this._updateUI(formatted);
-
-        let cursor = getCharPositionInFormatted(
-            formatted,
-            targetIndex,
-            this.filter
+        this._setCursor(
+            this.formatter.rawIndexToFormattedPos(rawStart - 1, this.mapping)
         );
+    }
 
-        // 👉 пропускаем разделители
-        while (
-            cursor < formatted.length &&
-            !this.filter.isValidChar(formatted[cursor])
-        ) {
-            cursor++;
+    /**
+     * Delete по rawValue.
+     * @private
+     */
+    _handleDelete() {
+        const start = this.inputElement.selectionStart;
+        const end = this.inputElement.selectionEnd;
+
+        const rawStart = this.formatter.formattedPosToRawIndex(start, this.mapping);
+        const rawEnd = this.formatter.formattedPosToRawIndex(end, this.mapping);
+
+        if (start !== end) {
+            this.rawValue =
+                this.rawValue.slice(0, rawStart) +
+                this.rawValue.slice(rawEnd);
+
+            this._render();
+            this._setCursor(
+                this.formatter.rawIndexToFormattedPos(rawStart, this.mapping)
+            );
+            return;
         }
 
-        setTimeout(() => {
-            this.inputElement.setSelectionRange(cursor, cursor);
-        }, 0);
+        if (rawStart >= this.rawValue.length) return;
 
-        this.lastValue = value;
-        this.lastFormatted = formatted;
+        this.rawValue =
+            this.rawValue.slice(0, rawStart) +
+            this.rawValue.slice(rawStart + 1);
 
-        this._syncRenderer();
+        this._render();
+
+        this._setCursor(
+            this.formatter.rawIndexToFormattedPos(rawStart, this.mapping)
+        );
     }
 
-    _restore(cursorPos) {
-        this.inputElement.value = this.lastFormatted;
-        this._updateUI(this.lastFormatted);
+    /**
+     * Ограничивает rawValue по количеству slot в mask.
+     * @private
+     */
+    _truncateToMask() {
+        const max = this._getMaxRawLength();
 
-        const pos = Math.min(cursorPos, this.lastFormatted.length);
-        this.inputElement.setSelectionRange(pos, pos);
-    }
-
-    _updateUI(formatted) {
-        if (this.renderer) {
-            this.renderer.update(formatted);
+        if (this.rawValue.length > max) {
+            this.rawValue = this.rawValue.slice(0, max);
         }
     }
 
-    _syncRenderer() {
-        if (!this.renderer) return;
-
-        this.renderer.syncStyles(this.inputElement);
-        this.renderer.update(this.inputElement.value);
-    }
-
-    _getMaxMaskLength() {
+    /**
+     * Подсчёт максимально допустимой длины rawValue.
+     *
+     * = количество slot-символов в mask.
+     *
+     * @returns {number}
+     * @private
+     */
+    _getMaxRawLength() {
         let count = 0;
-        for (let i = 0; i < this.mask.length; i++) {
-            if (this.filter.isMaskSlot(this.mask[i])) count++;
+
+        for (const ch of this.mask) {
+            if (this.filter.isMaskSlot(ch)) {
+                count++;
+            }
         }
+
         return count;
     }
 
-    // --- публичные методы ---
+    /**
+     * Устанавливает курсор.
+     *
+     * @param {number} pos
+     * @private
+     */
+    _setCursor(pos) {
+        this.inputElement.setSelectionRange(pos, pos);
+    }
 
+    /**
+     * Получить rawValue.
+     *
+     * @returns {string}
+     */
     getValue() {
-        return this.lastValue;
+        return this.rawValue;
     }
 
+    /**
+     * Установить rawValue программно.
+     *
+     * @param {string} value
+     */
     setValue(value) {
-        const clean = this.filter.filter(value).slice(0, this._getMaxMaskLength());
-        this._applyValue(clean, clean.length);
+        this.rawValue = this.filter.filter(value);
+
+        this._truncateToMask();
+        this._render();
+
+        this._setCursor(this.formattedValue.length);
     }
 
+    /**
+     * Очистить поле.
+     */
     clear() {
-        this._applyValue('', 0);
+        this.rawValue = '';
+        this._render();
+        this._setCursor(0);
     }
 
+    /**
+     * Обновить mask.
+     *
+     * @param {string} newMask
+     */
     updateMask(newMask) {
         this.mask = newMask;
-        const value = this.filter.filter(this.inputElement.value);
-        this._applyValue(value, value.length);
+
+        this.formatter = new MaskFormatter(
+            this.mask,
+            this.filter
+        );
+
+        this._truncateToMask();
+        this._render();
+    }
+
+    _onNativeInput() {
+        const domValue = this.inputElement.value;
+
+        if (domValue === this.formattedValue) {
+            return;
+        }
+
+        this.rawValue = this.filter.filter(domValue);
+
+        this._truncateToMask();
+        this._render();
+
+        this._setCursor(this.formattedValue.length);
     }
 }

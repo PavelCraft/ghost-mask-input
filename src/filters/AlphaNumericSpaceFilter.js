@@ -12,6 +12,6 @@ export class AlphaNumericSpaceFilter {
     }
 
     allowChar(ch) {
-        return /^[a-zA-Z0-9 ]$/.test(ch);
+        return /^[a-zA-Zа-яА-ЯёЁ0-9 ]$/u.test(ch);
     }
 }

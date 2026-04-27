@@ -1,17 +1,22 @@
+/**
+ * Базовый фильтр:
+ * пропускает любые символы.
+ * Используется для свободного текстового ввода.
+ */
 export class BaseFilter {
-    filter(str) {
-        return str;
-    }
-
-    allowChar(ch) {
+    isValidChar() {
         return true;
     }
 
-    isValidChar(ch) {
-        return true;
+    filter(value) {
+        return value ?? '';
     }
 
-    isMaskSlot(ch) {
+    isMaskSlot(char) {
+        return /[A-Za-zА-Яа-яЁё0-9]/u.test(char);
+    }
+
+    allowChar() {
         return true;
     }
 }

@@ -1,46 +1,19 @@
 import { BaseRenderStrategy } from './BaseRenderStrategy.js';
 
-const DEFAULT_SEPARATORS = ['+', '-', ',', ':', ';', ' ', '(', '.', ')'];
-
+/**
+ * Показывает реально введённую formatted-часть,
+ * а remaining берёт из хвоста mask.
+ */
 export class SeparatorAwareRenderer extends BaseRenderStrategy {
-    constructor(separators = DEFAULT_SEPARATORS) {
-        super();
-        this.separators = new Set(separators);
-    }
-
-    isSeparator(ch) {
-        return this.separators.has(ch);
-    }
-
     update(mask, formatted) {
-        let typed = '';
-        let remaining = '';
+        const maskChars = [...mask];
+        const formattedChars = [...formatted];
 
-        let formattedIndex = 0;
-
-        for (let i = 0; i < mask.length; i++) {
-            const maskChar = mask[i];
-            const formattedChar = formatted[formattedIndex];
-
-            if (this.isSeparator(maskChar)) {
-                if (formattedChar === maskChar) {
-                    typed += maskChar;
-                    formattedIndex++;
-                } else {
-                    remaining += maskChar;
-                }
-
-                continue;
-            }
-
-            if (formattedIndex < formatted.length) {
-                typed += formattedChar;
-                formattedIndex++;
-            } else {
-                remaining += maskChar;
-            }
-        }
-
-        return { typed, remaining };
+        return {
+            typed: formatted,
+            remaining: maskChars
+                .slice(formattedChars.length)
+                .join('')
+        };
     }
 }

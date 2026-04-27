@@ -14,7 +14,7 @@
 <div class="card">
     <h2>📞 Демо поля ввода текста</h2>
     <div class="field-group">
-        <label>Номер телефона</label>
+        <label>Просто текст</label>
         <div class="phone-wrapper">
             <div class="input-container">
                 <input
@@ -22,10 +22,8 @@
                     data-mask="AAAAA"
                     data-preset="text"
                     type="text"
-                    id="phone1"
                     placeholder=" "
                     autocomplete="off"
-                    inputmode="numeric"
                 >
 
                 <div class="mask-placeholder">
@@ -105,6 +103,24 @@
                 <input
                     class="ghost-mask-input"
                     data-mask="AA AA"
+                    data-preset="text-separated"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field-group">
+        <label>Дублирующиеся разделители</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AA AA--AA..AA"
                     data-preset="text-separated"
                     type="text"
                     placeholder=" "
