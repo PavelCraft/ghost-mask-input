@@ -12,10 +12,6 @@
  * - Django (через JS)
  */
 
-import {
-    getDigitCountBeforeCursor,
-    getDigitPositionInFormatted
-} from './cursor.js';
 import { formatByMask } from './format.js';
 import { extractDigits, getMaxDigitsInMask } from './utils.js';
 

@@ -1,42 +1,26 @@
-/**
- * Логика работы курсора.
- * 
- * Ключевая идея:
- * курсор измеряется в "количестве цифр", а не символов.
- */
-
-/**
- * Сколько цифр до курсора
- */
-export function getDigitCountBeforeCursor(formatted, cursorPos) {
+export function getCharCountBeforeCursor(str, pos, filter) {
     let count = 0;
-    for (let i = 0; i < Math.min(cursorPos, formatted.length); i++) {
-        if (formatted[i] >= '0' && formatted[i] <= '9') count++;
+    for (let i = 0; i < Math.min(pos, str.length); i++) {
+        if (filter.isValidChar(str[i])) count++;
     }
     return count;
 }
 
-/**
- * Позиция курсора по индексу цифры
- */
-export function getDigitPositionInFormatted(formatted, digitIndex) {
+export function getCharPositionInFormatted(str, index, filter) {
     let count = 0;
-    for (let i = 0; i < formatted.length; i++) {
-        if (formatted[i] >= '0' && formatted[i] <= '9') {
-            if (count === digitIndex) return i;
+    for (let i = 0; i < str.length; i++) {
+        if (filter.isValidChar(str[i])) {
+            if (count === index) return i;
             count++;
         }
     }
-    return formatted.length;
+    return str.length;
 }
 
-/**
- * Сколько цифр внутри выделения
- */
-export function getDigitCountInSelection(formatted, start, end) {
+export function getCharCountInSelection(str, start, end, filter) {
     let count = 0;
     for (let i = start; i < end; i++) {
-        if (formatted[i] >= '0' && formatted[i] <= '9') count++;
+        if (filter.isValidChar(str[i])) count++;
     }
     return count;
 }

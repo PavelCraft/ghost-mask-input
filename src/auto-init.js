@@ -1,51 +1,60 @@
-import { InputController } from './core/InputController.js';
-import { GhostRenderer } from './ui/GhostRenderer.js';
+import {
+    createAlnumPreset,
+    createAlnumSeparatedPreset,
+    createLowerTextPreset,
+    createNumericSeparatedPreset,
+    createTextPreset,
+    createTextSeparatedPreset,
+    createUpperTextPreset
+} from './index.js';
 
-/**
- * Автоматически находит все инпуты с классом `.ghost-mask-input`
- * и инициализирует маску + рендерер.
- *
- * Требования к HTML-структуре:
- * .input-container
- *   ├── input.ghost-mask-input
- *   └── .mask-placeholder
- *         ├── .ghost-typed
- *         └── .ghost-remaining
- */
+const PRESETS = {
+
+    'numeric-separated': createNumericSeparatedPreset,
+    'text': createTextPreset,
+    'alnum': createAlnumPreset,
+    'alnum-separated': createAlnumSeparatedPreset,
+    'text-separated': createTextSeparatedPreset,
+    'upper-text': createUpperTextPreset,
+    'lower-text': createLowerTextPreset
+};
+
 export function initGhostMask(root = document) {
     const inputs = root.querySelectorAll('.ghost-mask-input');
 
     inputs.forEach((input) => {
+        const presetName = input.dataset.preset;
+        if (!presetName) return;
+
+        const presetFactory = PRESETS[presetName];
+
+        if (!presetFactory) {
+            throw new Error(`Unknown preset: ${presetName}`);
+        }
+
         const container = input.closest('.input-container');
         if (!container) return;
 
-        const typed = container.querySelector('.ghost-typed');
-        const remaining = container.querySelector('.ghost-remaining');
+        const typedEl = container.querySelector('.ghost-typed');
+        const remainingEl = container.querySelector('.ghost-remaining');
 
-        if (!typed || !remaining) return;
+        if (!typedEl || !remainingEl) return;
 
         const mask = input.dataset.mask;
         const initial = input.dataset.initial;
-        const country = input.dataset.country || null;
-        if (!mask) return;
 
-        const renderer = new GhostRenderer(mask, typed, remaining);
-
-        const handler = new InputController(input, {
+        const controller = presetFactory(input, {
             mask,
-            renderer
-        })
+            typedEl,
+            remainingEl
+        });
 
-        // 👉 добавляем начальное значение (если есть)
         if (initial) {
-            handler.setDigits(initial);
+            controller.setValue(initial);
         }
     });
 }
 
-/**
- * Авто-старт при загрузке DOM
- */
 if (typeof window !== 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
         initGhostMask();

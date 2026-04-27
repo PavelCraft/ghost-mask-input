@@ -1,17 +1,15 @@
-/**
- * Точка входа библиотеки (public API)
- * 
- * Здесь экспортируется только то, что должно быть доступно пользователю.
- * Внутренние файлы (core) скрыты.
- */
-
-// Основной класс для телефонов
-export { InputController } from './core/InputController.js';
-
-// (опционально) если хочешь дать доступ к ядру:
+export { InputController } from './controller/InputController.js';
 export { MaskEngine } from './core/MaskEngine.js';
-
-// (опционально) для кастомных UI
 export { GhostRenderer } from './ui/GhostRenderer.js';
 
 export { initGhostMask } from './auto-init.js';
+
+export { createAlnumPreset } from './presets/alnumPreset.js';
+export { createAlnumSeparatedPreset } from './presets/alnumSeparatedPreset.js';
+export { createLowerTextPreset } from './presets/lowerTextPreset.js';
+export { createNumericPreset } from './presets/numericPreset.js';
+export { createNumericSeparatedPreset } from './presets/numericSeparatedPreset.js';
+export { createTextPreset } from './presets/textPreset.js';
+export { createTextSeparatedPreset } from './presets/textSeparatedPreset.js';
+export { createUpperTextPreset } from './presets/upperTextPreset.js';
+

@@ -12,17 +12,15 @@
 <body>
 
 <div class="card">
-    <h2>📞 Демо поля ввода телефона</h2>
+    <h2>📞 Демо поля ввода текста</h2>
     <div class="field-group">
         <label>Номер телефона</label>
-
         <div class="phone-wrapper">
-            <div class="country-code">🇷🇺 +7</div>
-
             <div class="input-container">
                 <input
                     class="ghost-mask-input"
-                    data-mask="912 345-67-89"
+                    data-mask="AAAAA"
+                    data-preset="text"
                     type="text"
                     id="phone1"
                     placeholder=" "
@@ -38,7 +36,7 @@
         </div>
     </div>
     <div class="field-group">
-        <label>Запасной номер телефона</label>
+        <label>Поле ввода номера телефона</label>
         <div class="phone-wrapper">
             <div class="country-code">🇷🇺 +7</div>
 
@@ -47,6 +45,7 @@
                     class="ghost-mask-input"
                     data-mask="+7 (912) 345-67-89"
                     data-initial="+7 (987) 654-32-10"
+                    data-preset="numeric-separated"
                     type="text"
                     id="phone2"
                     placeholder=" "
@@ -61,7 +60,100 @@
             </div>
         </div>
     </div>
+    <div class="field-group">
+        <label>Код</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AAAA1111"
+                    data-preset="alnum"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label>Серийный номер</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AAAA-1111-BBBB"
+                    data-preset="alnum-separated"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="field-group">
+        <label>ФИО</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AA AA"
+                    data-preset="text-separated"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field-group">
+        <label>Верхний регистр</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AAAAAAAA"
+                    data-preset="upper-text"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="field-group">
+        <label>Нижний регистр</label>
+        <div class="phone-wrapper">
+            <div class="input-container">
+                <input
+                    class="ghost-mask-input"
+                    data-mask="AAAAAAAA"
+                    data-preset="lower-text"
+                    type="text"
+                    placeholder=" "
+                >
+                <div class="mask-placeholder">
+                    <span class="ghost-typed"></span>
+                    <span class="ghost-remaining"></span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 <script type="module">
     import '../src/auto-init.js';
