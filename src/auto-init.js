@@ -1,25 +1,26 @@
-import {
-    createAlnumPreset,
-    createAlnumSeparatedPreset,
-    createLowerTextPreset,
-    createNumericSeparatedPreset,
-    createTextPreset,
-    createTextSeparatedPreset,
-    createUpperTextPreset
-} from './index.js';
+// auto-init.js
+export async function initGhostMask(root = document) {
+    // Динамический импорт внутри функции
+    const {
+        createAlnumPreset,
+        createAlnumSeparatedPreset,
+        createLowerTextPreset,
+        createNumericSeparatedPreset,
+        createTextPreset,
+        createTextSeparatedPreset,
+        createUpperTextPreset
+    } = await import('./index.js');
 
-const PRESETS = {
+    const PRESETS = {
+        'numeric-separated': createNumericSeparatedPreset,
+        'text': createTextPreset,
+        'alnum': createAlnumPreset,
+        'alnum-separated': createAlnumSeparatedPreset,
+        'text-separated': createTextSeparatedPreset,
+        'upper-text': createUpperTextPreset,
+        'lower-text': createLowerTextPreset
+    };
 
-    'numeric-separated': createNumericSeparatedPreset,
-    'text': createTextPreset,
-    'alnum': createAlnumPreset,
-    'alnum-separated': createAlnumSeparatedPreset,
-    'text-separated': createTextSeparatedPreset,
-    'upper-text': createUpperTextPreset,
-    'lower-text': createLowerTextPreset
-};
-
-export function initGhostMask(root = document) {
     const inputs = root.querySelectorAll('.ghost-mask-input');
 
     inputs.forEach((input) => {
@@ -56,7 +57,7 @@ export function initGhostMask(root = document) {
 }
 
 if (typeof window !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        initGhostMask();
+    document.addEventListener('DOMContentLoaded', async () => {
+        await initGhostMask();
     });
 }

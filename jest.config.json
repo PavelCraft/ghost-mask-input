@@ -1,0 +1,9 @@
+{
+  "testEnvironment": "jsdom",
+  "transform": {},
+  "moduleFileExtensions": ["js", "mjs"],
+  "testMatch": ["**/tests/**/*.test.js"],
+  "collectCoverageFrom": [
+    "src/**/*.js"
+  ]
+}

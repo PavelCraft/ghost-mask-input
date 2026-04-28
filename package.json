@@ -5,5 +5,14 @@
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.config.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@testing-library/user-event": "^14.6.1",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0"
   }
 }
