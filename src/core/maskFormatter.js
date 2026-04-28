@@ -56,9 +56,6 @@ export class MaskFormatter {
             const maskChar = this.mask[maskIndex];
             const isSlot = this.filter.isMaskSlot(maskChar);
 
-            /**
-             * SLOT
-             */
             if (isSlot) {
                 if (rawIndex >= raw.length) break;
 
@@ -67,20 +64,15 @@ export class MaskFormatter {
                 rawToFormatted[rawIndex] = formatted.length - 1;
                 formattedToRaw[formatted.length - 1] = rawIndex;
 
+                for (const sep in sepCounters) {
+                    sepCounters[sep] = 0;
+                }
+
                 rawIndex++;
                 continue;
             }
 
-            /**
-             * AUTO-CLOSE BRACKET
-             *
-             * Обрабатывается РАНЬШЕ ambiguous separator logic,
-             * иначе ')' воспринимается как separator.
-             */
-            if (
-                this.autoCloseBracket &&
-                maskChar === ')'
-            ) {
+            if (this.autoCloseBracket && maskChar === ')') {
                 if (this._shouldAutoCloseBracket(maskIndex, rawIndex)) {
                     formatted += ')';
                     formattedToRaw[formatted.length - 1] = null;
@@ -90,59 +82,29 @@ export class MaskFormatter {
                 break;
             }
 
-            /**
-             * Если raw закончился — separator больше не выводим
-             */
             if (rawIndex >= raw.length) break;
 
             const currentRaw = raw[rawIndex];
 
-            /**
-             * AMBIGUOUS SEPARATOR
-             *
-             * Первый separator, совпавший с separator mask:
-             * считаем масочным И consume'им raw.
-             *
-             * Повторные подряд separator:
-             * считаются пользовательскими.
-             */
             if (
-                currentRaw === maskChar &&
-                this.separators.has(maskChar)
+                this.separators.has(maskChar) &&
+                currentRaw === maskChar
             ) {
                 sepCounters[maskChar]++;
 
                 if (sepCounters[maskChar] === 1) {
                     formatted += maskChar;
-                    formattedToRaw[formatted.length - 1] = null;
+                    formattedToRaw[formatted.length - 1] = rawIndex;
 
-                    /**
-                     * ВАЖНО:
-                     * consume ambiguous raw separator,
-                     * иначе он попадёт в следующий slot.
-                     */
+                    rawToFormatted[rawIndex] = formatted.length - 1;
+
                     rawIndex++;
-
                     continue;
                 }
-
-                /**
-                 * Повторный separator:
-                 * трактуем как пользовательский символ.
-                 * Не consume здесь —
-                 * он будет вставлен в slot ниже.
-                 */
             } else {
-                /**
-                 * Любой другой символ сбрасывает streak
-                 * для данного separator.
-                 */
                 sepCounters[maskChar] = 0;
             }
 
-            /**
-             * Обычный separator маски
-             */
             if (this._hasUpcomingFillables(maskIndex, raw.length, rawIndex)) {
                 formatted += maskChar;
                 formattedToRaw[formatted.length - 1] = null;
@@ -212,18 +174,19 @@ export class MaskFormatter {
     formattedPosToRawIndex(pos, mapping) {
         if (pos <= 0) return 0;
 
-        let count = 0;
+        if (pos >= mapping.formatted.length) {
+            return mapping.rawToFormatted.length;
+        }
 
-        for (let i = 0; i < pos; i++) {
-            if (
-                mapping.formattedToRaw[i] !== null &&
-                mapping.formattedToRaw[i] !== undefined
-            ) {
-                count++;
+        for (let i = pos - 1; i >= 0; i--) {
+            const rawIndex = mapping.formattedToRaw[i];
+
+            if (rawIndex !== null && rawIndex !== undefined) {
+                return rawIndex + 1;
             }
         }
 
-        return count;
+        return 0;
     }
 
     /**

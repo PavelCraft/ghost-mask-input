@@ -986,228 +986,228 @@ test.describe('Ghost Mask Input E2E Tests', () => {
         });
     });
 
-//     // ============================================================
-//     // 8. Поле «Дублирующиеся разделители» с data-mask="AA AA--AA..AA" и data-preset="text-separated"
-//     // ============================================================
-//     test.describe('Поле «Дублирующиеся разделители» (mask: AA AA--AA..AA, preset: text-separated)', () => {
-//         test('Цепочка 1: "ab  cde" -> "ab  c--de", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+    // ============================================================
+    // 8. Поле «Дублирующиеся разделители» с data-mask="AA AA--AA..AA" и data-preset="text-separated"
+    // ============================================================
+    test.describe('Поле «Дублирующиеся разделители» (mask: AA AA--AA..AA, preset: text-separated)', () => {
+        test('Цепочка 1: "ab  cde" -> "ab  c--de", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab  cde');
-//             await expect(input).toHaveValue('ab  c--de');
-//             await expect(remaining).toHaveText('..AA');
-//         });
+            await input.click();
+            await input.fill('ab  cde');
+            await expect(input).toHaveValue('ab  c--de');
+            await expect(remaining).toHaveText('..AA');
+        });
 
-//         test('Цепочка 2: "ab  c d g " -> "ab  c-- d..g ", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 2: "ab  c d g " -> "ab  c-- d.. g", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab  c d g ');
-//             await expect(input).toHaveValue('ab  c-- d..g ');
-//             await expect(remaining).toHaveText('');
-//         });
+            await input.click();
+            await input.fill('ab  c d g ');
+            await expect(input).toHaveValue('ab  c-- d..g ');
+            await expect(remaining).toHaveText('');
+        });
 
-//         test('Цепочка 3: "ab cdefgh" -> "ab cd--ef..gh", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 3: "ab cdefgh" -> "ab cd--ef..gh", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab cdefgh');
-//             await expect(input).toHaveValue('ab cd--ef..gh');
-//             await expect(remaining).toHaveText('');
-//         });
+            await input.click();
+            await input.fill('ab cdefgh');
+            await expect(input).toHaveValue('ab cd--ef..gh');
+            await expect(remaining).toHaveText('');
+        });
 
-//         test('Цепочка 4: "         " -> "     --  ..  ", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 4: "         " -> "     --  ..  ", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('         ');
-//             await expect(input).toHaveValue('     --  ..  ');
-//             await expect(remaining).toHaveText('');
-//         });
+            await input.click();
+            await input.fill('         ');
+            await expect(input).toHaveValue('     --  ..  ');
+            await expect(remaining).toHaveText('');
+        });
 
-//         test('Цепочка 5: "a.b  .c,d " -> "ab  c--d ", "..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 5: "a.b  .c,d " -> "ab  c--d ", "..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('a.b  .c,d ');
-//             await expect(input).toHaveValue('ab  c--d ');
-//             await expect(remaining).toHaveText('..AA');
-//         });
+            await input.click();
+            await input.fill('a.b  .c,d ');
+            await expect(input).toHaveValue('ab  c--d ');
+            await expect(remaining).toHaveText('..AA');
+        });
 
-//         test('Цепочка 6: "abcdefghi" -> "ab cd--ef..gh", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 6: "abcdefghi" -> "ab cd--ef..gh", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abcdefghi');
-//             await expect(input).toHaveValue('ab cd--ef..gh');
-//             await expect(remaining).toHaveText('');
-//         });
+            await input.click();
+            await input.fill('abcdefghi');
+            await expect(input).toHaveValue('ab cd--ef..gh');
+            await expect(remaining).toHaveText('');
+        });
 
-//         test('Цепочка 7: "ab" -> "ab", " AA--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 7: "ab" -> "ab", " AA--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab');
-//             await expect(input).toHaveValue('ab');
-//             await expect(remaining).toHaveText(' AA--AA..AA');
-//         });
+            await input.click();
+            await input.fill('ab');
+            await expect(input).toHaveValue('ab');
+            await expect(remaining).toHaveText(' AA--AA..AA');
+        });
 
-//         test('Цепочка 8: "abc" -> "ab c", "A--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 8: "abc" -> "ab c", "A--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abc');
-//             await expect(input).toHaveValue('ab c');
-//             await expect(remaining).toHaveText('A--AA..AA');
-//         });
+            await input.click();
+            await input.fill('abc');
+            await expect(input).toHaveValue('ab c');
+            await expect(remaining).toHaveText('A--AA..AA');
+        });
 
-//         test('Цепочка 9: "abcd" -> "ab cd", "--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 9: "abcd" -> "ab cd", "--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abcd');
-//             await expect(input).toHaveValue('ab cd');
-//             await expect(remaining).toHaveText('--AA..AA');
-//         });
+            await input.click();
+            await input.fill('abcd');
+            await expect(input).toHaveValue('ab cd');
+            await expect(remaining).toHaveText('--AA..AA');
+        });
 
-//         test('Цепочка 10: "abcde" -> "ab cd--e", "A..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 10: "abcde" -> "ab cd--e", "A..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abcde');
-//             await expect(input).toHaveValue('ab cd--e');
-//             await expect(remaining).toHaveText('A..AA');
-//         });
+            await input.click();
+            await input.fill('abcde');
+            await expect(input).toHaveValue('ab cd--e');
+            await expect(remaining).toHaveText('A..AA');
+        });
 
-//         test('Цепочка 11: "Г1бdef" -> "Г1 бd--ef", "..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 11: "Г1бdef" -> "Г1 бd--ef", "..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('Г1бdef');
-//             await expect(input).toHaveValue('Г1 бd--ef');
-//             await expect(remaining).toHaveText('..AA');
-//         });
+            await input.click();
+            await input.fill('Г1бdef');
+            await expect(input).toHaveValue('Г1 бd--ef');
+            await expect(remaining).toHaveText('..AA');
+        });
 
-//         test('Цепочка 12: "abcdefg" -> "ab cd--ef..g", "A"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 12: "abcdefg" -> "ab cd--ef..g", "A"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abcdefg');
-//             await expect(input).toHaveValue('ab cd--ef..g');
-//             await expect(remaining).toHaveText('A');
-//         });
+            await input.click();
+            await input.fill('abcdefg');
+            await expect(input).toHaveValue('ab cd--ef..g');
+            await expect(remaining).toHaveText('A');
+        });
 
-//         test('Цепочка 13: "abcdefgh" -> "ab cd--ef..gh", ""', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 13: "abcdefgh" -> "ab cd--ef..gh", ""', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('abcdefgh');
-//             await expect(input).toHaveValue('ab cd--ef..gh');
-//             await expect(remaining).toHaveText('');
-//         });
+            await input.click();
+            await input.fill('abcdefgh');
+            await expect(input).toHaveValue('ab cd--ef..gh');
+            await expect(remaining).toHaveText('');
+        });
 
-//         test('Цепочка 14: "ab c", курсор после пробела, "d" -> "ab dc", "--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 14: "ab c", курсор после пробела, "d" -> "ab dc", "--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab c');
-//             // Курсор после пробела
-//             await input.press('ArrowLeft');
-//             await input.type('d');
-//             await expect(input).toHaveValue('ab dc');
-//             await expect(remaining).toHaveText('--AA..AA');
-//         });
+            await input.click();
+            await input.fill('ab c');
+            // Курсор после пробела
+            await input.press('ArrowLeft');
+            await input.type('d');
+            await expect(input).toHaveValue('ab dc');
+            await expect(remaining).toHaveText('--AA..AA');
+        });
 
-//         test('Цепочка 15: "ab cd", курсор после c, backspace (1) -> "ab d", "A--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 15: "ab cd", курсор после c, backspace (1) -> "ab d", "A--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab cd');
-//             // Курсор после c
-//             await input.press('ArrowLeft');
-//             await input.press('Backspace');
-//             await expect(input).toHaveValue('ab d');
-//             await expect(remaining).toHaveText('A--AA..AA');
-//         });
+            await input.click();
+            await input.fill('ab cd');
+            // Курсор после c
+            await input.press('ArrowLeft');
+            await input.press('Backspace');
+            await expect(input).toHaveValue('ab d');
+            await expect(remaining).toHaveText('A--AA..AA');
+        });
 
-//         test('Цепочка 16: "ab cd", курсор после пробела, backspace (1) -> "ac d", "A--AA..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 16: "ab cd", курсор после пробела, backspace (1) -> "ac d", "A--AA..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab cd');
-//             // Курсор после пробела
-//             await input.press('ArrowLeft');
-//             await input.press('ArrowLeft');
-//             await input.press('Backspace');
-//             await expect(input).toHaveValue('ac d');
-//             await expect(remaining).toHaveText('A--AA..AA');
-//         });
+            await input.click();
+            await input.fill('ab cd');
+            // Курсор после пробела
+            await input.press('ArrowLeft');
+            await input.press('ArrowLeft');
+            await input.press('Backspace');
+            await expect(input).toHaveValue('ac d');
+            await expect(remaining).toHaveText('A--AA..AA');
+        });
 
-//         test('Цепочка 17: "ab cd--ef", курсор после первого дефиса, delete (1) -> "ab cd--f", "A..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 17: "ab cd--ef", курсор после первого дефиса, delete (1) -> "ab cd--f", "A..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab cd--ef');
-//             // Курсор после первого дефиса (position 7)
-//             await input.press('Home');
-//             for (let i = 0; i < 6; i++) {
-//                 await input.press('ArrowRight');
-//             }
-//             await input.press('Delete');
-//             await expect(input).toHaveValue('ab cd--f');
-//             await expect(remaining).toHaveText('A..AA');
-//         });
+            await input.click();
+            await input.fill('ab cd--ef');
+            // Курсор после первого дефиса (position 7)
+            await input.press('Home');
+            for (let i = 0; i < 6; i++) {
+                await input.press('ArrowRight');
+            }
+            await input.press('Delete');
+            await expect(input).toHaveValue('ab cd--f');
+            await expect(remaining).toHaveText('A..AA');
+        });
 
-//         test('Цепочка 18: "ab cd--ef", курсор после первого дефиса, backspace (1) -> "ab ce--f", "A..AA"', async ({ page }) => {
-//             const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
-//             const container = input.locator('..').locator('..');
-//             const remaining = container.locator('.ghost-remaining');
+        test('Цепочка 18: "ab cd--ef", курсор после первого дефиса, backspace (1) -> "ab ce--f", "A..AA"', async ({ page }) => {
+            const input = page.locator('[data-mask="AA AA--AA..AA"][data-preset="text-separated"]').first();
+            const container = input.locator('..').locator('..');
+            const remaining = container.locator('.ghost-remaining');
             
-//             await input.click();
-//             await input.fill('ab cd--ef');
-//             // Курсор после первого дефиса (position 7)
-//             await input.press('Home');
-//             for (let i = 0; i < 6; i++) {
-//                 await input.press('ArrowRight');
-//             }
-//             await input.press('Backspace');
-//             await expect(input).toHaveValue('ab ce--f');
-//             await expect(remaining).toHaveText('A..AA');
-//         });
-//     });
+            await input.click();
+            await input.fill('ab cd--ef');
+            // Курсор после первого дефиса (position 7)
+            await input.press('Home');
+            for (let i = 0; i < 6; i++) {
+                await input.press('ArrowRight');
+            }
+            await input.press('Backspace');
+            await expect(input).toHaveValue('ab ce--f');
+            await expect(remaining).toHaveText('A..AA');
+        });
+    });
 });

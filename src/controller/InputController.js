@@ -302,10 +302,23 @@ export class InputController {
      * @private
      */
     _truncateToMask() {
-        const max = this._getMaxRawLength();
+const maxSlots = this._getMaxRawLength();
+        let countSlots = 0;
+        let cutIndex = this.rawValue.length;
 
-        if (this.rawValue.length > max) {
-            this.rawValue = this.rawValue.slice(0, max);
+        for (let i = 0; i < this.rawValue.length; i++) {
+            const ch = this.rawValue[i];
+            if (this.filter.isMaskSlot(ch)) {
+                countSlots++;
+                if (countSlots > maxSlots) {
+                    cutIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (cutIndex < this.rawValue.length) {
+            this.rawValue = this.rawValue.slice(0, cutIndex);
         }
     }
 
