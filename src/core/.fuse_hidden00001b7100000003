@@ -1,0 +1,212 @@
+/**
+ * Форматирует raw-значение по маске.
+ *
+ * Поддерживает:
+ * - separator'ы в маске
+ * - ambiguous separator (первый separator на позиции маски считается масочным)
+ * - repeated separators
+ * - auto-closing bracket ')'
+ * - mapping raw <-> formatted для cursor management
+ */
+export class MaskFormatter {
+    /**
+     * @param {string} mask
+     * @param {Object} filter
+     * @param {Object} [options]
+     * @param {string[]} [options.separators]
+     * @param {boolean} [options.autoCloseBracket=true]
+     */
+    constructor(mask, filter, options = {}) {
+        this.mask = mask;
+        this.filter = filter;
+
+        this.separators = new Set(
+            options.separators ?? ['+', '-', ',', ':', ';', ' ', '(', '.', ')']
+        );
+
+        this.autoCloseBracket = options.autoCloseBracket ?? true;
+    }
+
+    /**
+     * Форматирует raw строку в formatted.
+     *
+     * @param {string} rawValue
+     * @returns {{
+     *   raw: string,
+     *   formatted: string,
+     *   rawToFormatted: number[],
+     *   formattedToRaw: (number|null)[]
+     * }}
+     */
+    format(rawValue) {
+        const raw = [...rawValue];
+
+        let formatted = '';
+        const rawToFormatted = [];
+        const formattedToRaw = [];
+
+        let rawIndex = 0;
+
+        // Track how many times each separator has been consumed as mask separator
+        // Key: separator char, Value: count of mask-separator consumptions
+        const sepMaskCount = {};
+        for (const sep of this.separators) {
+            sepMaskCount[sep] = 0;
+        }
+
+        for (let maskIndex = 0; maskIndex < this.mask.length; maskIndex++) {
+            const maskChar = this.mask[maskIndex];
+            const isSlot = this.filter.isMaskSlot(maskChar);
+
+            if (isSlot) {
+                if (rawIndex >= raw.length) break;
+
+                formatted += raw[rawIndex];
+
+                rawToFormatted[rawIndex] = formatted.length - 1;
+                formattedToRaw[formatted.length - 1] = rawIndex;
+
+                rawIndex++;
+                continue;
+            }
+
+            if (this.autoCloseBracket && maskChar === ')') {
+                if (this._shouldAutoCloseBracket(maskIndex, rawIndex)) {
+                    formatted += ')';
+                    formattedToRaw[formatted.length - 1] = null;
+                    continue;
+                }
+
+                break;
+            }
+
+            if (rawIndex >= raw.length) break;
+
+            const currentRaw = raw[rawIndex];
+
+            // Check if current raw char matches mask separator
+            if (this.separators.has(maskChar) && currentRaw === maskChar) {
+                // Get how many times this separator has been used as mask separator
+                const maskSepCount = sepMaskCount[maskChar] || 0;
+
+                // First occurrence = mask separator, subsequent = literal
+                if (maskSepCount === 0) {
+                    // This is the first separator on mask position - treat as mask separator
+                    sepMaskCount[maskChar] = 1;
+                    formatted += maskChar;
+                    formattedToRaw[formatted.length - 1] = rawIndex;
+                    rawToFormatted[rawIndex] = formatted.length - 1;
+                    rawIndex++;
+                    continue;
+                } else {
+                    // This is a repeated separator - treat as literal user input
+                    // Don't increment sepMaskCount, just add to formatted as literal
+                    formatted += currentRaw;
+                    formattedToRaw[formatted.length - 1] = rawIndex;
+                    rawToFormatted[rawIndex] = formatted.length - 1;
+                    rawIndex++;
+                    continue;
+                }
+            }
+
+            if (this._hasUpcomingFillables(maskIndex, raw.length, rawIndex)) {
+                formatted += maskChar;
+                formattedToRaw[formatted.length - 1] = null;
+                continue;
+            }
+
+            break;
+        }
+
+        return {
+            raw: rawValue,
+            formatted,
+            rawToFormatted,
+            formattedToRaw
+        };
+    }
+
+    /**
+     * Проверяет, есть ли дальше по маске ещё заполняемые слоты.
+     *
+     * @param {number} maskIndex
+     * @param {number} rawLength
+     * @param {number} rawIndex
+     * @returns {boolean}
+     */
+    _hasUpcomingFillables(maskIndex, rawLength, rawIndex) {
+        let remainingSlots = 0;
+
+        for (let i = maskIndex + 1; i < this.mask.length; i++) {
+            if (this.filter.isMaskSlot(this.mask[i])) {
+                remainingSlots++;
+            }
+        }
+
+        return rawLength > rawIndex && remainingSlots > 0;
+    }
+
+    /**
+     * Проверяет, нужно ли автозакрыть ')'
+     * после заполнения всех slot'ов внутри скобок.
+     *
+     * @param {number} maskIndex
+     * @param {number} rawIndex
+     * @returns {boolean}
+     */
+    _shouldAutoCloseBracket(maskIndex, rawIndex) {
+        let slotsInside = 0;
+
+        for (let i = maskIndex - 1; i >= 0; i--) {
+            if (this.mask[i] === '(') break;
+
+            if (this.filter.isMaskSlot(this.mask[i])) {
+                slotsInside++;
+            }
+        }
+
+        return rawIndex >= slotsInside;
+    }
+
+    /**
+     * Конвертирует позицию курсора formatted -> raw index.
+     *
+     * @param {number} pos
+     * @param {Object} mapping
+     * @returns {number}
+     */
+    formattedPosToRawIndex(pos, mapping) {
+        if (pos <= 0) return 0;
+
+        if (pos >= mapping.formatted.length) {
+            return mapping.rawToFormatted.length;
+        }
+
+        for (let i = pos - 1; i >= 0; i--) {
+            const rawIndex = mapping.formattedToRaw[i];
+
+            if (rawIndex !== null && rawIndex !== undefined) {
+                return rawIndex + 1;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Конвертирует raw index -> позицию курсора в formatted.
+     *
+     * @param {number} rawIndex
+     * @param {Object} mapping
+     * @returns {number}
+     */
+    rawIndexToFormattedPos(rawIndex, mapping) {
+        if (rawIndex <= 0) return 0;
+
+        if (rawIndex - 1 >= mapping.rawToFormatted.length) {
+            return mapping.formatted.length;
+        }
+
+        return mapping.rawToFormatted[rawIndex - 1] + 1;
+    }
+}

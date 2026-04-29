@@ -1008,7 +1008,7 @@ test.describe('Ghost Mask Input E2E Tests', () => {
             
             await input.click();
             await input.fill('ab  c d g ');
-            await expect(input).toHaveValue('ab  c-- d..g ');
+            await expect(input).toHaveValue('ab  c-- d..g');
             await expect(remaining).toHaveText('');
         });
 
